@@ -14,13 +14,13 @@
           {{ $t('footer.social') }}
         </h3>
         <div class="flex justify-center md:justify-start space-x-4 mb-4">
-          <a href="#" class="hover:opacity-80 transition">
+          <a href="https://t.me/meteor_dubbin" class="hover:opacity-80 transition">
             <img src="/telegram.svg" alt="Telegram" class="w-6 h-6" />
           </a>
-          <a href="#" class="hover:opacity-80 transition">
+          <a href="https://youtube.com/@meteordubbing?si=Eyi-hkoKC81z1taq" class="hover:opacity-80 transition">
             <img src="/youtube.svg" alt="YouTube" class="w-6 h-6" />
           </a>
-          <a href="#" class="hover:opacity-80 transition">
+          <a href="https://www.instagram.com/meteor_dubbing" class="hover:opacity-80 transition">
             <img src="/instagram.svg" alt="Instagram" class="w-6 h-6" />
           </a>
         </div>
@@ -89,7 +89,7 @@
         <ul class="space-y-1">
           <li>
             <a
-              href="#"
+              href="https://t.me/shox_p2"
               class="hover:underline transition-colors"
               :class="darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-slate-900'"
             >
@@ -98,20 +98,20 @@
           </li>
           <li>
             <a
-              href="#"
+              href="https://t.me/meteor_dubbin"
               class="hover:underline transition-colors"
               :class="darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-slate-900'"
             >
-              Telegram
+              Asosiy Kanal
             </a>
           </li>
           <li>
             <a
-              href="#"
+              href="https://t.me/Cosmosstudiorasmiy"
               class="hover:underline transition-colors"
               :class="darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-slate-900'"
             >
-              {{ $t('footer.devChannel') }}
+              Hamkor Kanal
             </a>
           </li>
         </ul>
@@ -129,18 +129,15 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useI18n } from 'vue-i18n'; // 👈 Импортируем useI18n
+import { useI18n } from 'vue-i18n'; 
 
-// Инициализируем I18n для доступа к $t
 const { t } = useI18n(); 
 
 const darkMode = ref(JSON.parse(localStorage.getItem("darkMode")) || false);
 
 onMounted(() => {
-  // Синхронизация при загрузке
   darkMode.value = JSON.parse(localStorage.getItem("darkMode")) || false;
 
-  // Реагирует на изменения из других компонентов (через localStorage)
   window.addEventListener("storage", (e) => {
     if (e.key === "darkMode") {
       darkMode.value = JSON.parse(e.newValue);
