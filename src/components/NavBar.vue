@@ -1,270 +1,448 @@
 <template>
   <header
-    class="sticky top-0 z-50 shadow-sm transition-colors duration-500"
-    :class="darkMode ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-900 shadow-sm'"
-    @click.self="closeAll"
+    class="sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-300"
+    :class="darkMode 
+      ? 'bg-slate-900/80 border-slate-800 shadow-lg shadow-slate-900/50' 
+      : 'bg-white/80 border-gray-200 shadow-md shadow-gray-200/50'"
   >
-    <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-        <div class="flex items-center gap-2 cursor-pointer" @click="goHome">
-          <img :src="logoSrc" alt="Logo"
-               class="w-10 h-10 sm:w-12 sm:h-12 object-contain hover:scale-105 transition" />
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center justify-between gap-3">
+        <!-- Left Section: Logo + Avatar -->
+        <div class="flex items-center gap-3 sm:gap-4">
+          <!-- Logo -->
+          <div 
+            @click="goHome" 
+            class="cursor-pointer group flex items-center gap-2"
+          >
+            <div class="relative">
+              <img 
+                :src="logoSrc" 
+                alt="Logo"
+                class="w-10 h-10 sm:w-12 sm:h-12 object-contain transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6" 
+              />
+              <div class="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </div>
+            <span class="hidden md:block text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              MeteorDub
+            </span>
+          </div>
+
+          <!-- User Avatar -->
+          <button
+            @click="openProfile"
+            class="relative group"
+          >
+            <div class="relative">
+              <img
+                :src="user?.avatar || '/avatar.jpg'"
+                alt="avatar"
+                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 object-cover transition-all duration-300 group-hover:scale-110"
+                :class="darkMode ? 'border-purple-500' : 'border-purple-400'"
+              />
+              <!-- Online indicator -->
+              <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+            </div>
+          </button>
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-3">
-  <img
-    :src="user?.avatar || '/avatar.jpg'"
-    alt="avatar"
-    class="w-9 h-9 sm:w-10 sm:h-10 rounded-full border cursor-pointer hover:scale-105 transition object-cover"
-    :class="darkMode ? 'border-slate-700' : 'border-slate-200'"
-    @click="openProfile"
-  />
-</div>
-
-      </div>
-
-      <div class="flex items-center gap-2 sm:gap-3 relative flex-wrap sm:flex-nowrap">
-        <button
-          @click.stop="toggleSearch"
-          class="sm:hidden flex items-center justify-center w-10 h-10 rounded-full transition"
-          :class="darkMode ? 'hover:bg-slate-800 text-white' : 'hover:bg-slate-100 text-slate-700'"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-4.35-4.35M11 6a5 5 0 100 10 5 5 0 000-10z" />
-          </svg>
-        </button>
-
-        <div
-    class="flex items-center relative min-w-[200px]"
-    :class="[
-      isKeyboardOpen
-        ? 'fixed top-0 left-0 z-50 w-full px-4 sm:relative sm:w-auto sm:px-0'
-        : 'hidden sm:flex'
-    ]"
-  >
-    <input
-      v-model="search"
-      @input="emitSearch"
-      @focus="isKeyboardOpen = true"
-      @blur="onBlur"
-      type="text"
-      :placeholder="$t('searchPlaceholder')"
-      class="w-full pl-9 pr-4 py-2 rounded-full border focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm sm:text-base transition-colors duration-500"
-      :class="darkMode
-        ? 'bg-slate-800 border-slate-700 placeholder-slate-400 text-white'
-        : 'bg-white border-slate-300 placeholder-slate-500 text-slate-900'"
-    />
-
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-4 w-4 sm:h-5 sm:w-5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-      :class="darkMode ? 'text-slate-300' : 'text-slate-500'"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M21 21l-4.35-4.35M11 6a5 5 0 100 10 5 5 0 000-10z"
-      />
-    </svg>
-  </div>
-
-        <button @click.stop="toggleFilter"
-                class="flex items-center justify-center gap-1 w-10 sm:w-auto h-10 rounded-full text-sm font-medium transition px-3 sm:px-4"
-                :class="darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M3 4h18v2l-7 8v6l-4-2v-4L3 6z" />
-          </svg>
-          <span class="hidden sm:inline">{{ $t('filter') }}</span>
-        </button>
-
-        <button @click.stop="toggleGenres"
-                class="flex items-center justify-center h-10 rounded-full text-sm font-medium transition px-3 sm:px-4"
-                :class="darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'">
-          {{ $t('genres') }}
-        </button>
-
-        <button v-if="user" @click.stop="toggleSettings"
-                class="flex items-center justify-center w-10 h-10 rounded-full border transition"
-                :class="darkMode ? 'border-slate-700 hover:bg-slate-800 text-white' : 'border-slate-300 hover:bg-slate-100 text-slate-800'">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6"
-               viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="12" cy="5" r="1.5" />
-            <circle cx="12" cy="12" r="1.5" />
-            <circle cx="12" cy="19" r="1.5" />
-          </svg>
-        </button>
-
-        <router-link v-else to="/login"
-                     class="flex items-center justify-center h-10 px-3 sm:px-4 text-sm rounded-full bg-blue-500 text-white hover:bg-blue-600 transition">
-          {{ $t('login') }}
-        </router-link>
-
-        <transition name="fade">
-          <div v-if="showSettings"
-               class="absolute right-0 top-[calc(100%+12px)] border shadow-xl rounded-xl w-60 p-4 z-50 transition-colors duration-500"
-               :class="darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'"
-               @click.stop>
-            <button @click="showSettings = false" class="absolute top-2 right-2 hover:text-amber-400 transition">
-              ✖
+        <!-- Center: Search (Desktop) -->
+        <div class="hidden lg:flex flex-1 max-w-xl mx-8">
+          <div class="relative w-full group">
+            <input
+              v-model="search"
+              @input="emitSearch"
+              type="text"
+              :placeholder="$t('searchPlaceholder')"
+              class="w-full pl-12 pr-12 py-3 rounded-2xl border-2 focus:outline-none transition-all duration-300 text-sm"
+              :class="darkMode
+                ? 'bg-slate-800/50 border-slate-700 placeholder-slate-400 text-white focus:border-purple-500 focus:bg-slate-800'
+                : 'bg-gray-50 border-gray-200 placeholder-gray-500 text-slate-900 focus:border-purple-500 focus:bg-white'"
+            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 transition-colors"
+              :class="darkMode ? 'text-slate-400 group-focus-within:text-purple-400' : 'text-gray-500 group-focus-within:text-purple-500'"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <button
+              v-if="search"
+              @click="search = ''; emitSearch()"
+              class="absolute right-4 top-1/2 -translate-y-1/2 hover:scale-110 transition-transform"
+              :class="darkMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
-
-            <div class="space-y-3 text-sm mt-5">
-              <button @click="doLogout"
-                      class="w-full py-2 rounded-lg text-left hover:bg-red-500 hover:text-white px-2 transition-all">
-                🚪 {{ $t('logout') }}
-              </button>
-
-              <div class="flex items-center justify-between py-2">
-                <span>{{ $t(darkMode ? 'darkTheme' : 'lightMode') }}</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" class="sr-only peer" v-model="darkMode" @change="toggleDarkMode" />
-                  <div class="w-10 h-5 rounded-full transition-all"
-                       :class="darkMode ? 'bg-amber-400' : 'bg-slate-300'"></div>
-                  <div class="absolute left-[2px] top-[2px] bg-white h-4 w-4 rounded-full transition-all peer-checked:translate-x-5 peer-checked:rotate-[360deg]"></div>
-                </label>
-              </div>
-
-              <button @click="toggleLang"
-                      class="w-full py-2 rounded-lg font-semibold text-center transition-all"
-                      :class="locale === 'UZ' ? 'bg-emerald-500 text-white hover:bg-emerald-400' : 'bg-blue-500 text-white hover:bg-blue-400'">
-                {{ $t('languageText') }}: {{ locale }}
-              </button>
-            </div>
           </div>
-        </transition>
+        </div>
 
-        <transition name="fade">
-          <div v-if="showGenres"
-               class="absolute right-0 top-[calc(100%+14px)] w-72 sm:w-80 p-4 rounded-xl shadow-lg border z-50 transition-colors duration-500"
-               :class="darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'"
-               @click.stop>
-            <button @click="showGenres = false" class="absolute top-2 right-2 hover:text-amber-400 transition">
-              ✖
-            </button>
-            
-            <div class="font-semibold mb-2 text-center">{{ $t('selectGenres') }}</div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
-              <label v-for="genre in genresList" :key="genre.id" class="flex items-center space-x-2">
-                <input type="checkbox" :value="genre.slug || genre.name" v-model="selectedGenres" class="accent-amber-500" />
-                <span class="truncate">{{ genre.name }}</span>
-              </label>
-            </div>
-            <div class="border-t mt-3 pt-3">
-              <button @click="applyFilterGenres"
-                      class="w-full py-2 rounded-full font-semibold bg-amber-400 text-black hover:bg-amber-300 transition">
-                {{ $t('apply') }}
-              </button>
-            </div>
-          </div>
-        </transition>
+        <!-- Right Section: Action Buttons -->
+        <div class="flex items-center gap-2">
+          <!-- Mobile Search Toggle -->
+          <button
+            @click.stop="toggleSearch"
+            class="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300"
+            :class="darkMode 
+              ? 'hover:bg-slate-800 text-white' 
+              : 'hover:bg-gray-100 text-slate-700'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
 
-        <transition name="fade">
-          <div v-if="showFilter"
-               class="absolute right-0 top-[calc(100%+14px)] w-80 max-h-[70vh] overflow-y-auto p-4 rounded-xl shadow-lg border z-50 transition-colors duration-500"
-               :class="darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'"
-               @click.stop>
-            <button @click="showFilter = false" class="absolute top-2 right-2 hover:text-amber-400 transition">
-              ✖
-            </button>
+          <!-- Filter Button -->
+          <button 
+            @click.stop="toggleFilter"
+            class="flex items-center gap-2 px-3 sm:px-4 h-10 rounded-xl font-medium transition-all duration-300 group"
+            :class="darkMode 
+              ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+              : 'bg-gray-100 hover:bg-gray-200 text-slate-800'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            <span class="hidden sm:inline text-sm">{{ $t('filter') }}</span>
+          </button>
 
-            <div class="font-semibold mb-3 text-center">{{ $t('filter') }}</div>
-            <div class="space-y-3 text-sm">
-              <input type="text" v-model="filter.search" :placeholder="$t('searchPlaceholder')"
-                     class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-400"
-                     :class="darkMode ? 'bg-slate-700 border-slate-600 placeholder-slate-400 text-white' : 'bg-white border-slate-300 placeholder-slate-500 text-slate-800'" />
-              <div>
-                <label class="font-medium">{{ $t('type') }}</label>
-                <select v-model="filter.type"
-                        class="w-full border rounded-lg px-3 py-2 mt-1"
-                        :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'">
-                  <option value="">{{ $t('any') }}</option>
-                  <option value="TV">{{ $t('series') }}</option> 
-                  <option value="Movie">{{ $t('movie') }}</option>
-                  </select>
-              </div>
-              <div>
-                <label class="font-medium">{{ $t('status') }}</label>
-                <select v-model="filter.status"
-                        class="w-full border rounded-lg px-3 py-2 mt-1"
-                        :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'">
-                  <option value="">{{ $t('any') }}</option>
-                  <option value="Ongoing">{{ $t('ongoing') }}</option>
-                  <option value="Completed">{{ $t('released') }}</option> 
-                </select>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="font-medium">{{ $t('yearFrom') }}</label>
-                  <input type="number" v-model="filter.yearFrom" min="1980" max="2025"
-                         class="w-full border rounded-lg px-3 py-2 mt-1"
-                         :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'" />
-                </div>
-                <div>
-                  <label class="font-medium">{{ $t('yearTo') }}</label>
-                  <input type="number" v-model="filter.yearTo" min="1980" max="2025"
-                         class="w-full border rounded-lg px-3 py-2 mt-1"
-                         :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'" />
-                </div>
-              </div>
-              <div>
-                <label class="font-medium">{{ $t('ratingFrom') }}</label>
-                <input type="number" v-model="filter.ratingFrom" step="0.1" min="0" max="10"
-                       class="w-full border rounded-lg px-3 py-2 mt-1"
-                       :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'" />
-              </div>
-              <div>
-                <label class="font-medium">{{ $t('sort') }}</label>
-                <select v-model="filter.sort"
-                        class="w-full border rounded-lg px-3 py-2 mt-1"
-                        :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'">
-                  <option value="">{{ $t('noSort') }}</option>
-                  <option value="-rating">{{ $t('sortByRating') }} ({{ $t('desc') }})</option>
-                  <option value="rating">{{ $t('sortByRating') }} ({{ $t('asc') }})</option>
-                  <option value="-release_year">{{ $t('sortByYear') }} ({{ $t('desc') }})</option>
-                  <option value="release_year">{{ $t('sortByYear') }} ({{ $t('asc') }})</option>
-                  <option value="name">{{ $t('sortByAlphabet') }}</option> 
-                </select>
-              </div>
-              <div class="border-t pt-3">
-                <button @click="applyMainFilter"
-                        class="w-full bg-amber-400 text-black py-2 rounded-full font-semibold hover:bg-amber-300 transition">
-                  {{ $t('apply') }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </transition>
+          <!-- Genres Button -->
+          <button 
+            @click.stop="toggleGenres"
+            class="flex items-center gap-2 px-3 sm:px-4 h-10 rounded-xl font-medium transition-all duration-300"
+            :class="darkMode 
+              ? 'bg-slate-800 hover:bg-slate-700 text-white' 
+              : 'bg-gray-100 hover:bg-gray-200 text-slate-800'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            <span class="hidden sm:inline text-sm">{{ $t('genres') }}</span>
+          </button>
+
+          <!-- Settings / Login -->
+          <button 
+            v-if="user" 
+            @click.stop="toggleSettings"
+            class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 relative group"
+            :class="darkMode 
+              ? 'hover:bg-slate-800 text-white' 
+              : 'hover:bg-gray-100 text-slate-800'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+
+          <router-link 
+            v-else 
+            to="/login"
+            class="flex items-center gap-2 h-10 px-4 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+            <span class="text-sm">{{ $t('login') }}</span>
+          </router-link>
+        </div>
       </div>
     </div>
 
-    <transition name="slide">
-      <div v-if="showMobileSearch"
-           class="px-4 pb-3 border-t sm:hidden transition-colors duration-500"
-           :class="darkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'">
+    <!-- Mobile Search Expandable -->
+    <transition name="slide-down">
+      <div 
+        v-if="showMobileSearch"
+        class="lg:hidden border-t px-4 py-3"
+        :class="darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-200'"
+      >
         <div class="relative">
-          <input v-model="search" @input="emitSearch" type="text" :placeholder="$t('searchPlaceholder')"
-                 class="w-full pl-9 pr-4 py-2 rounded-full border focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm transition-colors duration-500"
-                 :class="darkMode ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-400' : 'bg-white border-slate-300 text-slate-800 placeholder-slate-500'" />
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2"
-               :class="darkMode ? 'text-slate-300' : 'text-slate-500'" fill="none" viewBox="0 0 24 24"
-               stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-4.35-4.35M11 6a5 5 0 100 10 5 5 0 000-10z" />
+          <input
+            v-model="search"
+            @input="emitSearch"
+            type="text"
+            :placeholder="$t('searchPlaceholder')"
+            class="w-full pl-12 pr-12 py-3 rounded-2xl border-2 focus:outline-none transition-all duration-300"
+            :class="darkMode
+              ? 'bg-slate-800 border-slate-700 placeholder-slate-400 text-white focus:border-purple-500'
+              : 'bg-gray-50 border-gray-200 placeholder-gray-500 text-slate-900 focus:border-purple-500'"
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2"
+            :class="darkMode ? 'text-slate-400' : 'text-gray-500'"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
+          <button
+            v-if="search"
+            @click="search = ''; emitSearch()"
+            class="absolute right-4 top-1/2 -translate-y-1/2"
+            :class="darkMode ? 'text-slate-400' : 'text-gray-500'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
       </div>
     </transition>
+
+    <!-- Settings Dropdown -->
+    <transition name="fade-scale">
+      <div 
+        v-if="showSettings"
+        class="absolute right-4 top-[calc(100%+8px)] w-72 rounded-2xl shadow-2xl border backdrop-blur-xl z-50 overflow-hidden"
+        :class="darkMode 
+          ? 'bg-slate-800/95 border-slate-700' 
+          : 'bg-white/95 border-gray-200'"
+        @click.stop
+      >
+        <!-- Header -->
+        <div class="p-4 border-b" :class="darkMode ? 'border-slate-700' : 'border-gray-200'">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-lg">{{ $t('settings') }}</h3>
+            <button 
+              @click="showSettings = false"
+              class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+              :class="darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-100'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="p-4 space-y-3">
+          <!-- Dark Mode Toggle -->
+          <div class="flex items-center justify-between p-3 rounded-xl transition-colors" :class="darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-50'">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="darkMode ? 'bg-slate-700' : 'bg-gray-100'">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              </div>
+              <span class="font-medium">{{ darkMode ? $t('darkTheme') : $t('lightMode') }}</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" class="sr-only peer" v-model="darkMode" @change="toggleDarkMode" />
+              <div class="w-12 h-6 rounded-full transition-all peer-checked:bg-purple-600" :class="darkMode ? 'bg-purple-600' : 'bg-gray-300'"></div>
+              <div class="absolute left-1 top-1 bg-white h-4 w-4 rounded-full transition-all peer-checked:translate-x-6 shadow-md"></div>
+            </label>
+          </div>
+
+          <!-- Language Toggle -->
+          <button 
+            @click="toggleLang"
+            class="w-full flex items-center gap-3 p-3 rounded-xl transition-all font-medium"
+            :class="darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-50'"
+          >
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="darkMode ? 'bg-slate-700' : 'bg-gray-100'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+            </div>
+            <span>{{ $t('languageText') }}: <span class="font-bold">{{ locale }}</span></span>
+          </button>
+
+          <!-- Logout -->
+          <button 
+            @click="doLogout"
+            class="w-full flex items-center gap-3 p-3 rounded-xl transition-all bg-red-500/10 hover:bg-red-500 hover:text-white font-medium text-red-600"
+          >
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-red-500/20">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </div>
+            <span>{{ $t('logout') }}</span>
+          </button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Genres Dropdown -->
+    <transition name="fade-scale">
+      <div 
+        v-if="showGenres"
+        class="absolute right-4 top-[calc(100%+8px)] w-80 max-h-[500px] overflow-y-auto rounded-2xl shadow-2xl border backdrop-blur-xl z-50"
+        :class="darkMode ? 'bg-slate-800/95 border-slate-700' : 'bg-white/95 border-gray-200'"
+        @click.stop
+      >
+        <div class="sticky top-0 p-4 border-b backdrop-blur-xl" :class="darkMode ? 'bg-slate-800/95 border-slate-700' : 'bg-white/95 border-gray-200'">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-lg">{{ $t('selectGenres') }}</h3>
+            <button 
+              @click="showGenres = false"
+              class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+              :class="darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-100'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-4">
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <label 
+              v-for="genre in genresList" 
+              :key="genre.id"
+              class="flex items-center gap-2 p-3 rounded-xl cursor-pointer transition-all"
+              :class="[
+                selectedGenres.includes(genre.slug || genre.name)
+                  ? darkMode
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-purple-500 text-white'
+                  : darkMode
+                    ? 'bg-slate-700 hover:bg-slate-600'
+                    : 'bg-gray-100 hover:bg-gray-200'
+              ]"
+            >
+              <input 
+                type="checkbox" 
+                :value="genre.slug || genre.name" 
+                v-model="selectedGenres"
+                class="hidden"
+              />
+              <span class="text-sm font-medium truncate">{{ genre.name }}</span>
+            </label>
+          </div>
+          
+          <button 
+            @click="applyFilterGenres"
+            class="w-full py-3 rounded-xl font-bold transition-all bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg hover:shadow-xl"
+          >
+            {{ $t('apply') }} ({{ selectedGenres.length }})
+          </button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Filter Dropdown -->
+    <transition name="fade-scale">
+      <div 
+        v-if="showFilter"
+        class="absolute right-4 top-[calc(100%+8px)] w-80 max-h-[600px] overflow-y-auto rounded-2xl shadow-2xl border backdrop-blur-xl z-50"
+        :class="darkMode ? 'bg-slate-800/95 border-slate-700' : 'bg-white/95 border-gray-200'"
+        @click.stop
+      >
+        <div class="sticky top-0 p-4 border-b backdrop-blur-xl" :class="darkMode ? 'bg-slate-800/95 border-slate-700' : 'bg-white/95 border-gray-200'">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-lg">{{ $t('filter') }}</h3>
+            <button 
+              @click="showFilter = false"
+              class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+              :class="darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-100'"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-4 space-y-4">
+          <!-- Type -->
+          <div>
+            <label class="block font-medium mb-2 text-sm">{{ $t('type') }}</label>
+            <select 
+              v-model="filter.type"
+              class="w-full border-2 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+              :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200 text-slate-800'"
+            >
+              <option value="">{{ $t('any') }}</option>
+              <option value="TV">{{ $t('series') }}</option>
+              <option value="Movie">{{ $t('movie') }}</option>
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label class="block font-medium mb-2 text-sm">{{ $t('status') }}</label>
+            <select 
+              v-model="filter.status"
+              class="w-full border-2 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+              :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200 text-slate-800'"
+            >
+              <option value="">{{ $t('any') }}</option>
+              <option value="Ongoing">{{ $t('ongoing') }}</option>
+              <option value="Completed">{{ $t('released') }}</option>
+            </select>
+          </div>
+
+          <!-- Year Range -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium mb-2 text-sm">{{ $t('yearFrom') }}</label>
+              <input 
+                type="number" 
+                v-model="filter.yearFrom" 
+                min="1980" 
+                max="2025"
+                class="w-full border-2 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200 text-slate-800'"
+              />
+            </div>
+            <div>
+              <label class="block font-medium mb-2 text-sm">{{ $t('yearTo') }}</label>
+              <input 
+                type="number" 
+                v-model="filter.yearTo" 
+                min="1980" 
+                max="2025"
+                class="w-full border-2 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200 text-slate-800'"
+              />
+            </div>
+          </div>
+
+          <!-- Sort -->
+          <div>
+            <label class="block font-medium mb-2 text-sm">{{ $t('sort') }}</label>
+            <select 
+              v-model="filter.sort"
+              class="w-full border-2 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+              :class="darkMode ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200 text-slate-800'"
+            >
+              <option value="">{{ $t('noSort') }}</option>
+              <option value="-rating">{{ $t('sortByRating') }} ↓</option>
+              <option value="rating">{{ $t('sortByRating') }} ↑</option>
+              <option value="-release_year">{{ $t('sortByYear') }} ↓</option>
+              <option value="release_year">{{ $t('sortByYear') }} ↑</option>
+            </select>
+          </div>
+
+          <button 
+            @click="applyMainFilter"
+            class="w-full py-3 rounded-xl font-bold transition-all bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg hover:shadow-xl"
+          >
+            {{ $t('apply') }}
+          </button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Backdrop -->
+    <transition name="fade">
+      <div 
+        v-if="showSettings || showGenres || showFilter"
+        @click="closeAll"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+      ></div>
+    </transition>
   </header>
 </template>
-
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch, computed, watchEffect } from "vue";
 import { useRouter, useRoute } from "vue-router";
@@ -408,6 +586,10 @@ function toggleLang() {
 function toggleDarkMode() {
   document.documentElement.classList.toggle("dark", darkMode.value);
   localStorage.setItem("darkMode", JSON.stringify(darkMode.value));
+  if (!sessionStorage.getItem("themeReloaded")) {
+    sessionStorage.setItem("themeReloaded", "true");
+    window.location.reload();
+  }
 }
 
 // --- Load user data ---
@@ -425,8 +607,9 @@ async function loadUserData() {
 
 // --- Lifecycle ---
 onMounted(() => {
+  sessionStorage.removeItem("themeReloaded");
   if (darkMode.value) document.documentElement.classList.add("dark");
-
+  
   // Only close dropdowns if click is OUTSIDE header
   document.addEventListener("click", (e) => {
     const header = document.querySelector("header");

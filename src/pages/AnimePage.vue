@@ -1,132 +1,243 @@
 <template>
   <div
-    class="min-h-screen transition-colors duration-500 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+    class="min-h-screen w-full transition-colors duration-500"
+    :class="darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-100 text-slate-900'"
   >
-    <div
-      class="max-w-6xl mx-auto bg-white dark:bg-gray-800 mt-6 rounded-2xl shadow-lg p-4 sm:p-8 transition-all"
-    >
-      <div class="mb-5">
+    <!-- Hero Banner Section -->
+    <div v-if="!isLoading && anime" class="relative w-full h-[400px] md:h-[500px] overflow-hidden">
+      <!-- Background Image with Parallax Effect -->
+      <div 
+        class="absolute inset-0 bg-cover bg-center transform scale-105"
+        :style="{ backgroundImage: `url(${anime.image})` }"
+      >
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
+      </div>
+
+      <!-- Back Button -->
+      <div class="relative z-10 max-w-7xl mx-auto px-4 pt-6">
         <button
           @click="goBack"
-          class="flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-green-600 transition-all font-semibold text-sm sm:text-base"
+          class="group flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300 hover:scale-105"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg class="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
-          {{ $t('detail.back') }}
+          <span class="font-semibold text-white">{{ $t('detail.back') }}</span>
         </button>
       </div>
 
-      <div v-if="isLoading" class="text-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
-        <p class="mt-4 text-gray-600 dark:text-gray-300">{{ $t('loading') }}...</p>
-      </div>
-
-      <div
-        v-else-if="!anime || isError"
-        class="text-center text-gray-500 dark:text-gray-400 py-20 text-xl"
-      >
-        {{ $t('detail.notFound') }}
-      </div>
-
-      <div v-else>
-        <div class="flex flex-row flex-wrap items-start justify-between gap-3 sm:gap-6">
-          <div class="flex-1 min-w-[180px]">
-            <h1 class="text-2xl sm:text-3xl font-extrabold mb-2 text-gray-800 dark:text-gray-100">
-              {{ anime.title }}
-            </h1>
-
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-yellow-400 text-xl">⭐</span>
-              <span class="bg-yellow-400 text-black font-semibold px-2 py-0.5 rounded-full text-sm">
-                {{ anime.rating }}
-              </span>
-            </div>
-
-            <div class="space-y-0.5 text-gray-700 dark:text-gray-300 text-xs sm:text-sm mb-4">
-              <p>
-                <b>{{ $t('detail.status') }}:</b>
-                <span
-                  :class="anime.status === 'Completed'
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-orange-500 dark:text-orange-400'"
-                  class="font-semibold"
-                >
-                  {{ anime.status === 'Completed' ? $t('released') : $t('ongoing') }}
-                </span>
-              </p>
-              <p><b>{{ $t('detail.type') }}:</b> {{ anime.type }}</p>
-              <p><b>{{ $t('detail.year') }}:</b> {{ anime.year }}</p>
-              <p><b>{{ $t('detail.ageRating') }}:</b> {{ anime.ageRating }}</p>
-              <p><b>{{ $t('detail.genre') }}:</b> {{ anime.genre }}</p>
+      <!-- Hero Content -->
+      <div class="relative z-10 max-w-7xl mx-auto px-4 h-full flex items-end pb-8">
+        <div class="flex flex-col md:flex-row gap-6 w-full">
+          <!-- Poster Image -->
+          <div class="flex-shrink-0">
+            <div class="relative group">
+              <img
+                :src="anime.image"
+                :alt="anime.title"
+                class="w-48 h-72 md:w-56 md:h-80 object-cover rounded-2xl shadow-2xl ring-4 ring-white/20 transform transition-all duration-500 group-hover:scale-105 group-hover:rotate-1"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-purple-500/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
           </div>
 
-          <div class="flex flex-col items-center sm:items-end ml-auto w-[130px] sm:w-[250px]">
-            <img
-              :src="anime.image"
-              :alt="anime.title"
-              class="rounded-xl shadow-md object-cover transform hover:scale-105 transition duration-500 w-[130px] sm:w-[250px]"
-            />
+          <!-- Info -->
+          <div class="flex-1 space-y-4 pb-4">
+            <div>
+              <h1 class="text-4xl md:text-5xl lg:text-6xl font-black mb-2 text-white drop-shadow-2xl">
+                {{ anime.title }}
+              </h1>
+              
+              <!-- Stats Bar -->
+              <div class="flex flex-wrap items-center gap-3 text-sm md:text-base">
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/20 backdrop-blur-sm border border-yellow-500/30">
+                  <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <span class="font-bold text-yellow-400">{{ anime.rating }}</span>
+                </div>
 
-            <div class="grid grid-cols-2 gap-1.5 mt-2 w-full">
+                <span 
+                  class="px-3 py-1.5 rounded-full font-semibold backdrop-blur-sm border"
+                  :class="anime.status === 'Completed' 
+                    ? 'bg-green-500/20 border-green-500/30 text-green-400' 
+                    : 'bg-orange-500/20 border-orange-500/30 text-orange-400'"
+                >
+                  {{ anime.status === 'Completed' ? $t('released') : $t('ongoing') }}
+                </span>
+
+                <span class="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold">
+                  {{ anime.type }}
+                </span>
+
+                <span class="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold">
+                  {{ anime.year }}
+                </span>
+
+                <span class="px-3 py-1.5 rounded-full bg-purple-500/20 backdrop-blur-sm border border-purple-500/30 text-purple-300 font-semibold">
+                  {{ anime.ageRating }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Genres -->
+            <div class="flex flex-wrap gap-2">
+              <span 
+                v-for="(genre, idx) in anime.genre.split(',')" 
+                :key="idx"
+                class="px-3 py-1 rounded-full text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-colors"
+              >
+                {{ genre.trim() }}
+              </span>
+            </div>
+
+            <!-- Description Preview -->
+            <p class="text-gray-200 text-base md:text-lg leading-relaxed max-w-3xl line-clamp-2">
+              {{ anime.description }}
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 max-w-2xl">
               <button
                 v-for="tag in tags"
                 :key="tag.name"
                 @click="selectTag(tag.name)"
-                class="flex flex-col items-center justify-center gap-0.5 py-1 rounded-lg border text-[9px] sm:text-[11px] font-medium transition-all duration-200 text-center w-full"
+                class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
                 :class="[
                   activeTag === tag.name
                     ? tag.name === 'watching'
-                      ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 scale-[1.03]'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/50'
                       : tag.name === 'paused'
-                      ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-300 dark:border-red-700 scale-[1.03]'
+                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/50'
                       : tag.name === 'finished'
-                      ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700 scale-[1.03]'
-                      : tag.name === 'favorite'
-                      ? 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-700 scale-[1.03]'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600'
-                    : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/50'
+                      : 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg shadow-pink-500/50'
+                    : 'bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20'
                 ]"
               >
-                <component :is="tag.icon" class="w-3.5 h-3.5 opacity-80" />
-                <span class="font-semibold">{{ $t(`tag.${tag.name}`) }}</span>
+                <component :is="tag.icon" class="w-5 h-5" />
+                <span class="text-sm">{{ $t(`tag.${tag.name}`) }}</span>
               </button>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="mt-6">
-          <h2 class="text-base sm:text-lg font-semibold mb-2 text-gray-800 dark:text-gray-100">
-            {{ $t('detail.aboutAnime') }}:
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex flex-col items-center justify-center py-32">
+      <div class="relative w-24 h-24 mb-6">
+        <div class="absolute inset-0 border-4 border-purple-200 dark:border-purple-900 rounded-full animate-ping"></div>
+        <div class="absolute inset-0 border-4 border-t-purple-600 rounded-full animate-spin"></div>
+      </div>
+      <p class="text-2xl font-bold">{{ $t('loading') }}...</p>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="!anime || isError" class="flex flex-col items-center justify-center py-32">
+      <div class="w-32 h-32 rounded-full flex items-center justify-center mb-6 bg-red-100 dark:bg-red-900/20">
+        <svg class="w-16 h-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <p class="text-3xl font-bold mb-2">{{ $t('detail.notFound') }}</p>
+    </div>
+
+    <!-- Main Content -->
+    <div v-else class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      
+      <!-- About Section -->
+      <section 
+        class="rounded-3xl overflow-hidden shadow-2xl transition-all duration-500"
+        :class="darkMode ? 'bg-slate-800/50 backdrop-blur-sm' : 'bg-white/80 backdrop-blur-sm'"
+      >
+        <div class="p-6 md:p-8">
+          <h2 class="text-2xl md:text-3xl font-bold mb-4 flex items-center gap-3">
+            <div class="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+            {{ $t('detail.aboutAnime') }}
           </h2>
-          <p class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-5">
+          <p class="text-base md:text-lg leading-relaxed" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
             {{ anime.description }}
           </p>
+        </div>
+      </section>
 
-          <div class="flex flex-wrap gap-2 mb-6">
+      <!-- Episodes Section -->
+      <section 
+        class="rounded-3xl overflow-hidden shadow-2xl transition-all duration-500"
+        :class="darkMode ? 'bg-slate-800/50 backdrop-blur-sm' : 'bg-white/80 backdrop-blur-sm'"
+      >
+        <div class="p-6 md:p-8">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl md:text-3xl font-bold flex items-center gap-3">
+              <div class="w-1 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></div>
+              Episodes
+            </h2>
+            <span 
+              class="px-4 py-2 rounded-full text-sm font-bold"
+              :class="darkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-200 text-gray-700'"
+            >
+              {{ anime.episodes.length }} {{ $t('detail.ep') }}
+            </span>
+          </div>
+
+          <!-- Episodes Grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
             <button
               v-for="(ep, i) in anime.episodes"
               :key="ep.id"
-              class="min-w-[80px] px-3 py-1.5 rounded-full font-semibold transition-all shadow-sm text-xs sm:text-sm text-center"
-              :class="
-                selectedEpisode === i
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-green-400 hover:text-white'
-              "
               @click="selectedEpisode = i"
+              class="group relative aspect-video rounded-xl overflow-hidden transition-all duration-300 hover:scale-105"
+              :class="[
+                selectedEpisode === i
+                  ? 'ring-4 ring-purple-500 shadow-lg shadow-purple-500/50'
+                  : 'ring-2 ring-transparent hover:ring-white/30'
+              ]"
             >
-              {{ ep.episode_number || (i + 1) }} - {{ $t('detail.ep') }}
+              <div 
+                class="absolute inset-0 transition-all duration-300"
+                :class="[
+                  selectedEpisode === i
+                    ? 'bg-gradient-to-br from-purple-600 to-pink-600'
+                    : darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-gray-200 group-hover:bg-gray-300'
+                ]"
+              >
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                  <svg 
+                    v-if="selectedEpisode === i" 
+                    class="w-8 h-8 mb-1 text-white" 
+                    fill="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                  <span 
+                    class="text-lg font-bold"
+                    :class="selectedEpisode === i ? 'text-white' : darkMode ? 'text-gray-300' : 'text-gray-700'"
+                  >
+                    {{ ep.episode_number || (i + 1) }}
+                  </span>
+                  <span 
+                    class="text-xs font-medium"
+                    :class="selectedEpisode === i ? 'text-white/90' : darkMode ? 'text-gray-400' : 'text-gray-600'"
+                  >
+                    EP
+                  </span>
+                </div>
+              </div>
             </button>
           </div>
+        </div>
+      </section>
 
-          <div class="aspect-video bg-black rounded-xl overflow-hidden shadow-xl mb-8">
+      <!-- Video Player -->
+      <section 
+        class="rounded-3xl overflow-hidden shadow-2xl"
+        :class="darkMode ? 'bg-slate-800/50 backdrop-blur-sm' : 'bg-white/80 backdrop-blur-sm'"
+      >
+        <div class="p-4 md:p-6">
+          <div class="aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
             <iframe
               v-if="currentVideoUrl"
               class="w-full h-full"
@@ -134,70 +245,119 @@
               frameborder="0"
               allowfullscreen
             ></iframe>
-            <div v-else class="w-full h-full flex items-center justify-center text-white/50">
-              {{ $t('detail.noVideo') }}
+            <div v-else class="w-full h-full flex items-center justify-center">
+              <div class="text-center space-y-3">
+                <svg class="w-20 h-20 mx-auto text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <p class="text-gray-500 text-lg">{{ $t('detail.noVideo') }}</p>
+              </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div
-            class="border-t pt-4 bg-gray-50 dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow-inner"
+      <!-- Comments Section -->
+      <section 
+        class="rounded-3xl overflow-hidden shadow-2xl transition-all duration-500"
+        :class="darkMode ? 'bg-slate-800/50 backdrop-blur-sm' : 'bg-white/80 backdrop-blur-sm'"
+      >
+        <div class="p-6 md:p-8">
+          <h2 class="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3">
+            <div class="w-1 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full"></div>
+            {{ $t('detail.comments') }}
+          </h2>
+
+          <!-- Comment Input -->
+          <div 
+            class="rounded-2xl p-4 mb-6 transition-all"
+            :class="darkMode ? 'bg-slate-900/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'"
           >
-            <h2 class="text-base sm:text-lg font-semibold mb-2 dark:text-gray-100">
-              {{ $t('detail.comments') }}
-            </h2>
             <textarea
               v-model="comment"
               :placeholder="$t('detail.commentPlaceholder')"
-              class="w-full border dark:border-gray-700 rounded-xl p-3 mb-2 resize-none focus:ring-2 focus:ring-green-400 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              class="w-full bg-transparent border-0 resize-none focus:outline-none text-base placeholder-gray-500"
+              :class="darkMode ? 'text-white' : 'text-gray-900'"
               rows="3"
             ></textarea>
-            <div class="flex justify-between items-center mb-3">
-              <div class="space-x-2">
-                <button class="px-2 py-1 border dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-700 font-bold text-sm">
-                  B
+            <div class="flex justify-between items-center mt-3 pt-3 border-t" :class="darkMode ? 'border-slate-700' : 'border-gray-200'">
+              <div class="flex gap-2">
+                <button 
+                  class="p-2 rounded-lg transition-all hover:scale-110"
+                  :class="darkMode ? 'hover:bg-slate-800' : 'hover:bg-gray-200'"
+                >
+                  <span class="font-bold">B</span>
                 </button>
-                <button class="px-2 py-1 border dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-700 italic text-sm">
-                  I
+                <button 
+                  class="p-2 rounded-lg transition-all hover:scale-110"
+                  :class="darkMode ? 'hover:bg-slate-800' : 'hover:bg-gray-200'"
+                >
+                  <span class="italic">I</span>
                 </button>
-                <button class="px-2 py-1 border dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-700 underline text-sm">
-                  U
+                <button 
+                  class="p-2 rounded-lg transition-all hover:scale-110"
+                  :class="darkMode ? 'hover:bg-slate-800' : 'hover:bg-gray-200'"
+                >
+                  <span class="underline">U</span>
                 </button>
               </div>
               <button
                 @click="addComment"
                 :disabled="isSending"
-                class="bg-green-500 text-white px-4 py-1.5 rounded-full hover:bg-green-600 transition text-sm disabled:bg-green-400 disabled:cursor-not-allowed"
+                class="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
                 {{ isSending ? $t('detail.sending') : $t('detail.send') }}
               </button>
             </div>
-
-            <transition-group name="fade" tag="div">
-             <div
-              v-for="(c, i) in comments"
-              :key="c.id || i"
-              class="border-t pt-3 mt-3 bg-white dark:bg-gray-700 p-3 rounded-xl shadow-sm text-sm"
-            >
-              <div class="flex items-center justify-between mb-1">
-                <span class="font-semibold text-green-600 dark:text-green-300">
-                  {{ c.author_name || 'Anonymous' }}
-                </span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ new Date(c.created_at).toLocaleString() }}
-                </span>
-              </div>
-              <p class="text-gray-800 dark:text-gray-100 leading-snug">
-                {{ c.comment }}
-              </p>
-            </div>
-            </transition-group>
-            
-            <p v-if="!comments.length && !isLoading" class="text-center text-gray-500 dark:text-gray-400 mt-4">
-                {{ $t('detail.noComments') }}
-            </p>
           </div>
+
+          <!-- Comments List -->
+          <div class="space-y-4">
+            <transition-group name="comment">
+              <div
+                v-for="(c, i) in comments"
+                :key="c.id || i"
+                class="rounded-2xl p-5 transition-all duration-300 hover:scale-[1.02]"
+                :class="darkMode ? 'bg-slate-900/50 border border-slate-700' : 'bg-gray-50 border border-gray-200'"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+                      {{ (c.author_name || 'A')[0].toUpperCase() }}
+                    </div>
+                    <div>
+                      <p class="font-bold text-lg" :class="darkMode ? 'text-white' : 'text-gray-900'">
+                        {{ c.author_name || 'Anonymous' }}
+                      </p>
+                      <p class="text-xs" :class="darkMode ? 'text-gray-500' : 'text-gray-500'">
+                        {{ new Date(c.created_at).toLocaleString() }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <p class="text-base leading-relaxed" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
+                  {{ c.comment }}
+                </p>
+              </div>
+            </transition-group>
+          </div>
+
+          <p 
+            v-if="!comments.length && !isLoading" 
+            class="text-center py-12"
+            :class="darkMode ? 'text-gray-500' : 'text-gray-400'"
+          >
+            <svg class="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            {{ $t('detail.noComments') }}
+          </p>
         </div>
-      </div>
+      </section>
+
     </div>
   </div>
 </template>
@@ -222,7 +382,8 @@ const anime = ref(null);
 const isLoading = ref(true);
 const isError = ref(false);
 const selectedEpisode = ref(0);
-const activeTag = ref(null); 
+const activeTag = ref(null);
+const darkMode = ref(false);
 
 const tags = ref([
   { name: "watching", icon: EyeIcon },
@@ -230,10 +391,6 @@ const tags = ref([
   { name: "finished", icon: CheckCircleIcon },
   { name: "favorite", icon: HeartIcon },
 ]);
-
-// ---------------------------------------------
-// ЛОКАЛЬНОЕ ХРАНЕНИЕ СПИСКОВ
-// ---------------------------------------------
 
 function getLocalAnimeList(tag) {
   const key = `${tag}_anime_ids`;
@@ -253,8 +410,7 @@ function saveLocalAnimeList(tag, list) {
 
 function initializeActiveTag() {
   if (!anime.value) return;
-
-  const animeId = parseInt(anime.value.id); 
+  const animeId = parseInt(anime.value.id);
   const allTags = tags.value.map(t => t.name);
   
   for (const tag of allTags) {
@@ -269,7 +425,6 @@ function initializeActiveTag() {
 
 const selectTag = (tag) => {
   if (!anime.value) return;
-
   const animeId = parseInt(anime.value.id);
   const currentTag = activeTag.value;
 
@@ -278,14 +433,12 @@ const selectTag = (tag) => {
     const newList = currentList.filter(id => id !== animeId);
     saveLocalAnimeList(currentTag, newList);
     activeTag.value = null;
-
   } else {
     if (currentTag) {
       const oldList = getLocalAnimeList(currentTag);
       const newOldList = oldList.filter(id => id !== animeId);
       saveLocalAnimeList(currentTag, newOldList);
     }
-
     const newList = getLocalAnimeList(tag);
     if (!newList.includes(animeId)) {
       newList.push(animeId);
@@ -295,9 +448,6 @@ const selectTag = (tag) => {
   }
 };
 
-// ---------------------------------------------
-// ЛОГИКА ВИДЕОПЛЕЕРА
-// ---------------------------------------------
 const currentVideoUrl = computed(() => {
   if (!anime.value || anime.value.episodes.length <= selectedEpisode.value || selectedEpisode.value < 0) {
     return null;
@@ -307,46 +457,30 @@ const currentVideoUrl = computed(() => {
   if (Array.isArray(episode.languages) && episode.languages.length > 0) {
     let videoObject = episode.languages.find(lang => lang.is_default);
     if (!videoObject) {
-        videoObject = episode.languages[0];
+      videoObject = episode.languages[0];
     }
     return videoObject.video_url || null;
   }
-  return episode.video_url || null; 
+  return episode.video_url || null;
 });
 
-// ----------------------
-// Episode Comments Logic
-// ----------------------
 const comments = ref([]);
 const comment = ref("");
 const isSending = ref(false);
 
-/**
- * Fetch comments for specific episode.
- * * ✅ ИСПРАВЛЕНИЕ: Теперь корректно извлекает данные из 'results' в ответе API.
- */
 async function fetchComments(animeId, episodeId) {
-  comments.value = []; 
-
+  comments.value = [];
   try {
     const res = await fetch(`${API_BASE}/animes/${animeId}/episodes/${episodeId}/comments/`);
     if (!res.ok) throw new Error(`Failed to fetch comments: ${res.status}`);
     const data = await res.json();
-
-    // 🔴 КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Извлекаем массив из ключа 'results'
     let loadedComments = Array.isArray(data.results) ? data.results : [];
-    
-    // Если по какой-то причине API возвращает старую структуру { data: [...] }
     if (!loadedComments.length && Array.isArray(data.data)) {
-        loadedComments = data.data;
+      loadedComments = data.data;
     }
-
-    // Сортировка по дате создания, чтобы самые новые были сверху
     comments.value = loadedComments.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
-    
-    console.log("✅ Comments loaded (from results/data):", comments.value);
   } catch (err) {
     console.error("❌ Error loading comments:", err);
     comments.value = [];
@@ -355,7 +489,6 @@ async function fetchComments(animeId, episodeId) {
 
 async function addComment() {
   const text = comment.value.trim();
-
   if (!text) {
     alert("⚠️ Comment field is required.");
     return;
@@ -375,7 +508,6 @@ async function addComment() {
   }
 
   isSending.value = true;
-
   try {
     const res = await fetch(
       `${API_BASE}/animes/${animeId}/episodes/${currentEpisode.id}/comments/`,
@@ -383,28 +515,21 @@ async function addComment() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`, 
+          "Authorization": `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ comment: text }),
       }
     );
 
     const data = await res.json();
-
     if (!res.ok) {
-      const backendError =
-        data?.errors?.comment?.[0] ||
-        data?.message ||
-        "Failed to post comment.";
+      const backendError = data?.errors?.comment?.[0] || data?.message || "Failed to post comment.";
       throw new Error(backendError);
     }
 
-    // Добавляем новый комментарий (берем из data.data или из data)
-    const newComment = data.data || data; 
+    const newComment = data.data || data;
     comments.value.unshift(newComment);
     comment.value = "";
-
-    console.log("💬 New comment added:", data);
   } catch (err) {
     console.error("❌ Error posting comment:", err);
     alert(`❌ ${err.message}`);
@@ -413,25 +538,19 @@ async function addComment() {
   }
 }
 
-// Загрузка комментариев при смене эпизода
 watch(selectedEpisode, async (newIndex, oldIndex) => {
-    if (newIndex === oldIndex || newIndex < 0) return;
-
-    const currentEpisode = anime.value?.episodes[newIndex];
-    if (anime.value?.id && currentEpisode?.id) {
-        await fetchComments(anime.value.id, currentEpisode.id);
-    }
+  if (newIndex === oldIndex || newIndex < 0) return;
+  const currentEpisode = anime.value?.episodes[newIndex];
+  if (anime.value?.id && currentEpisode?.id) {
+    await fetchComments(anime.value.id, currentEpisode.id);
+  }
 });
 
-
-// ---------------------------------------------
-// API FETCH (Обновлен для вызова fetchComments)
-// ---------------------------------------------
 async function fetchAnimeById(animeId) {
   isLoading.value = true;
   isError.value = false;
   anime.value = null;
-  comments.value = []; 
+  comments.value = [];
 
   if (!animeId || isNaN(parseInt(animeId))) {
     console.error("Invalid anime ID provided.");
@@ -458,7 +577,7 @@ async function fetchAnimeById(animeId) {
     }
 
     anime.value = {
-      id: detailData.id, 
+      id: detailData.id,
       title: detailData.title_ru || detailData.title || "Title N/A",
       rating: detailData.rating ? detailData.rating.toFixed(1) : "N/A",
       status: detailData.status?.toUpperCase() === "ONGOING" ? "Ongoing" : "Completed",
@@ -470,20 +589,17 @@ async function fetchAnimeById(animeId) {
         : t("detail.noGenre"),
       image: detailData.poster_url || "/placeholder.jpg",
       description: detailData.description || t("detail.noDescription"),
-      episodes, 
+      episodes,
     };
 
     selectedEpisode.value = anime.value.episodes.length > 0 ? 0 : -1;
     
-    // ✅ ИСПРАВЛЕНИЕ: ЯВНЫЙ ВЫЗОВ ЗАГРУЗКИ КОММЕНТАРИЕВ ДЛЯ ПЕРВОГО ЭПИЗОДА
     const initialEpisode = anime.value.episodes[selectedEpisode.value];
     if (anime.value.id && initialEpisode?.id && selectedEpisode.value !== -1) {
-        await fetchComments(anime.value.id, initialEpisode.id);
+      await fetchComments(anime.value.id, initialEpisode.id);
     }
-    // -----------------------------------------------------------------------
 
-    initializeActiveTag(); 
-
+    initializeActiveTag();
   } catch (err) {
     console.error("Critical error:", err.message);
     isError.value = true;
@@ -493,16 +609,12 @@ async function fetchAnimeById(animeId) {
   }
 }
 
-
-// ---------------------------------------------
-// UI LOGIC & LIFECYCLE
-// ---------------------------------------------
-
 const goBack = () => router.go(-1);
 
 onMounted(() => {
   const savedMode = JSON.parse(localStorage.getItem("darkMode"));
-  document.documentElement.classList.toggle("dark", savedMode);
+  darkMode.value = savedMode || false;
+  document.documentElement.classList.toggle("dark", darkMode.value);
 
   const animeId = route.params.id;
   fetchAnimeById(animeId);
@@ -514,21 +626,28 @@ watch(
     if (newId) fetchAnimeById(newId);
   }
 );
-
-
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(10px);
+
+.comment-enter-active,
+.comment-leave-active {
+  transition: all 0.4s ease;
 }
-.fade-leave-to {
+
+.comment-enter-from {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(20px) scale(0.95);
+}
+
+.comment-leave-to {
+  opacity: 0;
+  transform: translateX(-20px) scale(0.95);
 }
 </style>
