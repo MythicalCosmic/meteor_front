@@ -4,13 +4,15 @@ import AnimePage from "../pages/AnimePage.vue";
 import ProfileView from "../views/ProfileView.vue";
 import LoginView from '../views/LoginView.vue'
 import SignupView from '../views/SignupView.vue'
+import DonationPage from '../pages/DonationPage.vue'
 import { isAuthenticated } from '../utils/auth' // Функция, проверяющая LocalStorage
 
 const routes = [
   { path: '/', name: 'Home', component: HomePage },
 // 🚨 ИЗМЕНЕНИЕ: Меняем :id на :slug
 // 🚨 ИЗМЕНЕНИЕ: Возвращаем :id
-{ path: "/anime/:id", component: AnimePage, name: "anime" },
+  { path: "/anime/:id", component: AnimePage, name: "anime" },  
+  {path: '/rating', component: DonationPage, name: 'donation'},
   { path: '/login', name: 'Login', component: LoginView },
   { path: '/signup', name: 'Signup', component: SignupView },
   

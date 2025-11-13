@@ -96,6 +96,22 @@
             </svg>
           </button>
 
+          <!-- Donation Button -->
+          <router-link 
+            to="/rating"
+            class="flex items-center gap-2 px-3 sm:px-4 h-10 rounded-xl font-medium transition-all duration-300 group relative overflow-hidden"
+            :class="darkMode 
+              ? 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg shadow-amber-500/30' 
+              : 'bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white shadow-lg shadow-amber-400/30'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="hidden sm:inline text-sm font-bold">{{ locale === 'UZ' ? 'Yordam' : 'Донаты' }}</span>
+            <span class="sm:hidden text-sm font-bold">💰</span>
+            <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+          </router-link>
+
           <!-- Filter Button -->
           <button 
             @click.stop="toggleFilter"
@@ -443,8 +459,9 @@
     </transition>
   </header>
 </template>
+
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, computed, watchEffect } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch, watchEffect } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { logout as authLogout, currentUser, fetchMe } from '../utils/auth'; 
@@ -488,7 +505,6 @@ async function fetchGenres() {
   }
 }
 
-// ✅ Debounced Search — updates router query instead of emit()
 let searchTimeout = null;
 function emitSearch() {
   if (searchTimeout) clearTimeout(searchTimeout);
@@ -501,7 +517,6 @@ function emitSearch() {
   }, 500);
 }
 
-// ✅ Apply filters through query params
 function getFilterQueryParams() {
   const params = { ...route.query };
   const f = filter.value;
@@ -524,15 +539,12 @@ function getFilterQueryParams() {
   return params;
 }
 
-
-// --- Search keyboard fix ---
-const isKeyboardOpen = ref(false)
+const isKeyboardOpen = ref(false);
 
 function onBlur() {
-  // Delay reset to avoid flicker when keyboard closes
   setTimeout(() => {
-    isKeyboardOpen.value = false
-  }, 300)
+    isKeyboardOpen.value = false;
+  }, 300);
 }
 
 function applyMainFilter() {
@@ -542,12 +554,10 @@ function applyMainFilter() {
   showFilter.value = false;
 }
 
-// ✅ Apply selected genres as search query (API uses “search”)
 function applyFilterGenres() {
   const query = { ...route.query };
 
   if (selectedGenres.value.length > 0) {
-    // ✅ Use 'genres' instead of 'search'
     query.genres = selectedGenres.value.join(",");
   } else {
     delete query.genres;
@@ -558,8 +568,6 @@ function applyFilterGenres() {
   showGenres.value = false;
 }
 
-
-// --- UI Toggles ---
 function toggleGenres() { closeAll(); showGenres.value = !showGenres.value; }
 function toggleFilter() { closeAll(); showFilter.value = !showFilter.value; }
 function toggleSearch() { showMobileSearch.value = !showMobileSearch.value; }
@@ -568,7 +576,6 @@ function closeAll() { showGenres.value = false; showFilter.value = false; showSe
 function goHome() { router.push({ name: "Home" }); }
 function openProfile() { closeAll(); router.push("/profile"); }
 
-// --- Auth ---
 function doLogout() {
   authLogout(); 
   user.value = null; 
@@ -576,7 +583,6 @@ function doLogout() {
   showSettings.value = false;
 }
 
-// --- UI Preferences ---
 function toggleLang() {
   const newLang = locale.value === "UZ" ? "RU" : "UZ";
   locale.value = newLang; 
@@ -592,7 +598,6 @@ function toggleDarkMode() {
   }
 }
 
-// --- Load user data ---
 async function loadUserData() {
   const localUser = currentUser();
   if (localUser) {
@@ -605,12 +610,10 @@ async function loadUserData() {
   }
 }
 
-// --- Lifecycle ---
 onMounted(() => {
   sessionStorage.removeItem("themeReloaded");
   if (darkMode.value) document.documentElement.classList.add("dark");
   
-  // Only close dropdowns if click is OUTSIDE header
   document.addEventListener("click", (e) => {
     const header = document.querySelector("header");
     if (header && !header.contains(e.target)) {
@@ -622,12 +625,10 @@ onMounted(() => {
   fetchGenres();
 });
 
-
 onBeforeUnmount(() => {
   window.removeEventListener("click", closeAll);
 });
 
-// --- Watch router to sync search/filter ---
 watch(() => route.query, (q) => {
   search.value = q.search || "";
   filter.value = {
@@ -640,30 +641,32 @@ watch(() => route.query, (q) => {
     sort: q.ordering || "",
   };
 });
+
 watchEffect(() => {
   if (isKeyboardOpen.value) {
-    // Lock scrolling but don't force height (prevents white screen)
-    document.body.style.overflow = "hidden"
-    document.body.style.position = "fixed"
-    document.body.style.width = "100%"
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.width = "100%";
   } else {
-    document.body.style.overflow = ""
-    document.body.style.position = ""
-    document.body.style.width = ""
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.width = "";
   }
-})
+});
 </script>
 
-<style  scoped>
+<style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
-.slide-enter-active, .slide-leave-active { transition: all 0.2s ease; }
-.slide-enter-from, .slide-leave-to { opacity: 0; transform: translateY(-8px); }
+.fade-scale-enter-active, .fade-scale-leave-active { transition: all 0.2s ease; }
+.fade-scale-enter-from, .fade-scale-leave-to { opacity: 0; transform: scale(0.95); }
+.slide-down-enter-active, .slide-down-leave-active { transition: all 0.2s ease; }
+.slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-8px); }
 
 html,
 body {
   height: 100%;
   overflow-x: hidden;
-  overscroll-behavior: contain; /* stops mobile bounce */
+  overscroll-behavior: contain;
 }
 </style>

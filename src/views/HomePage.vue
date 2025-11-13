@@ -426,23 +426,6 @@
           </button>
         </div>
       </section>
-
-      <!-- FOOTER -->
-      <footer class="py-8 sm:py-12 text-center border-t" :class="darkMode ? 'border-slate-800' : 'border-gray-200'">
-        <div class="space-y-4">
-          <div class="text-3xl sm:text-4xl font-black bg-gradient-to-r from-purple-500 to-pink-600 bg-clip-text text-transparent">
-            MeteorDub
-          </div>
-          <p class="text-xs sm:text-sm opacity-60">Your premium anime streaming platform</p>
-          <div class="flex items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm">
-            <a href="#" class="hover:text-purple-500 transition-colors">About</a>
-            <a href="#" class="hover:text-purple-500 transition-colors">Contact</a>
-            <a href="#" class="hover:text-purple-500 transition-colors">Terms</a>
-            <a href="#" class="hover:text-purple-500 transition-colors">Privacy</a>
-          </div>
-          <p class="text-xs opacity-50">© 2025 MeteorDub. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   </div>
 </template>
