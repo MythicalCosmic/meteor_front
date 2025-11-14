@@ -146,7 +146,7 @@
 
                 <!-- Premium Button with Effects -->
                 <a
-                  href="https://t.me/shox_p2"
+                  href="https://t.me/Meteorpremium_bot"
                   target="_blank"
                   class="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 relative overflow-hidden group/btn"
                   :class="user.is_premium
