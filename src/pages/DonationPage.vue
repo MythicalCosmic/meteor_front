@@ -266,7 +266,7 @@ const darkMode = ref(true);
 const donors = ref([]);
 const loading = ref(true);
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = 'https://api.meteordub.uz/api';
 
 const topDonors = computed(() => donors.value.slice(0, 3));
 const otherDonors = computed(() => donors.value.slice(3));
@@ -279,31 +279,40 @@ function formatAmount(amount) {
 async function fetchDonors() {
   try {
     loading.value = true;
+
     const response = await fetch(`${API_BASE}/donations/`);
     if (!response.ok) throw new Error('Failed to fetch donations');
 
     const res = await response.json();
 
     if (res.success && res.data) {
-      const topDonorsData = (res.data.top_donors || []).map(d => ({
-        id: d.user.id,
-        username: d.user.full_name || d.user.email?.split('@')[0] || 'User',
-        email: d.user.email,
-        total_amount: d.total_amount || 0,
-        donation_count: d.donation_count || 0,
-        avatar: d.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.user.id}`
-      }));
+      // Map top donors (has 'user' object)
+      const topDonorsData = (res.data.top_donors || []).map(d => {
+        const user = d.user || {};
+        return {
+          id: user.id ?? d.id ?? Math.random(), // fallback random ID
+          username: user.full_name || user.email?.split('@')[0] || 'User',
+          email: user.email || '',
+          total_amount: d.total_amount || 0,
+          donation_count: d.donation_count || 0,
+          avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id ?? Math.random()}`
+        };
+      });
 
+      // Map other donors (flat structure)
       const otherDonorsData = (res.data.other_donors || []).map(d => ({
-        id: d.user.id,
-        username: d.user.full_name || d.user.email?.split('@')[0] || 'User',
-        email: d.user.email,
-        total_amount: d.total_amount || 0,
-        donation_count: d.donation_count || 0,
-        avatar: d.user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.user.id}`
+        id: d.id ?? Math.random(),
+        username: d.name || d.email?.split('@')[0] || 'User',
+        email: d.email || '',
+        total_amount: d.amount || 0,
+        donation_count: d.donation_count || 1,
+        avatar: d.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id ?? Math.random()}`
       }));
 
+      // Combine
       donors.value = [...topDonorsData, ...otherDonorsData];
+    } else {
+      donors.value = [];
     }
   } catch (error) {
     console.error('Error fetching donors:', error);
@@ -312,6 +321,7 @@ async function fetchDonors() {
     loading.value = false;
   }
 }
+
 
 onMounted(() => {
   fetchDonors();
