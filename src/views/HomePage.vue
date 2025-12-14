@@ -1,10 +1,13 @@
 <template>
+  
   <div
+  
     class="min-h-screen w-full transition-colors duration-500"
     :class="darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-100 text-slate-900'"
   >
+    
     <div class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-      
+        <StoriesViewer :darkMode="darkModes" />
       <!-- HERO SLIDER -->
       <section
         v-if="showSlider && slides.length"
@@ -435,12 +438,16 @@ import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import Card from '../components/Card.vue';
+import StoriesViewer from '../components/StoryViewer.vue';
+
+const darkModes = ref(JSON.parse(localStorage.getItem('darkMode')) || false);
 
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 
 const API_BASE = 'https://api.meteordub.uz/api';
+
 
 // ========================================
 // STATE MANAGEMENT
