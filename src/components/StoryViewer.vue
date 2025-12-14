@@ -1,38 +1,67 @@
 <template>
   <div>
-    <!-- Stories Ring (Shows on home page) -->
+    <!-- Official Stories Banner -->
     <div v-if="stories.length > 0" class="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 mb-4 sm:mb-6">
-      <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        <button
-          v-for="(story, idx) in stories"
-          :key="story.id"
-          @click="openStories(idx)"
-          class="flex-shrink-0 flex flex-col items-center gap-2 group"
-        >
-          <!-- Story Ring -->
-          <div class="relative">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-red-500 p-0.5 group-hover:scale-110 transition-transform duration-300">
-              <div class="w-full h-full rounded-full p-0.5"
-                :class="darkMode ? 'bg-slate-900' : 'bg-white'">
-                <div 
-                  class="w-full h-full rounded-full bg-cover bg-center bg-gray-300"
-                  :style="{ backgroundImage: `url(${getStoryThumbnail(story)})` }"
-                ></div>
+      <!-- Main Featured Story Banner -->
+      <div 
+        @click="openStories(0)"
+        class="relative overflow-hidden rounded-2xl sm:rounded-3xl cursor-pointer group transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+        :class="darkMode 
+          ? 'bg-gradient-to-r from-purple-900/50 via-pink-900/50 to-red-900/50 border border-purple-700/50' 
+          : 'bg-gradient-to-r from-purple-50 via-pink-50 to-red-50 border border-purple-200'"
+      >
+        <!-- Animated Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)] animate-pulse"></div>
+        </div>
+
+        <div class="relative flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
+          <!-- Animated Icon -->
+          <div class="flex-shrink-0">
+            <div class="relative">
+              <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-8 sm:h-8 text-white animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
               </div>
+              <!-- Ping animation -->
+              <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 animate-ping opacity-20"></div>
             </div>
-            <!-- New badge -->
-            <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg">
+                📢 NEW
+              </span>
+              <span class="text-xs opacity-60" :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
+                {{ stories.length }} {{ stories.length === 1 ? 'announcement' : 'announcements' }}
+              </span>
+            </div>
+            <h3 class="font-bold text-sm sm:text-base md:text-lg mb-0.5 sm:mb-1 truncate"
+              :class="darkMode ? 'text-white' : 'text-gray-900'">
+              {{ stories[0].title || 'Official Announcement' }}
+            </h3>
+            <p class="text-xs sm:text-sm opacity-70 line-clamp-1"
+              :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
+              Tap to view {{ stories.length > 1 ? 'all announcements' : 'announcement' }}
+            </p>
+          </div>
+
+          <!-- Arrow with animation -->
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-transform group-hover:translate-x-1"
+              :class="darkMode ? 'bg-white/10' : 'bg-gray-200'">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" :class="darkMode ? 'text-white' : 'text-gray-900'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </div>
           </div>
-          <!-- Author name -->
-          <span class="text-xs font-medium max-w-[70px] truncate"
-            :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
-            {{ story.author?.username || 'MeteorDub' }}
-          </span>
-        </button>
+        </div>
+
+        <!-- Bottom indicator if multiple stories -->
+        <div v-if="stories.length > 1" class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 opacity-50"></div>
       </div>
     </div>
 
@@ -71,15 +100,15 @@
 
           <!-- Story Header -->
           <div class="absolute top-8 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 p-0.5">
-              <div 
-                class="w-full h-full rounded-full bg-cover bg-center bg-gray-300"
-                :style="{ backgroundImage: `url(${getStoryThumbnail(currentStory)})` }"
-              ></div>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
             </div>
             <div class="flex-1">
-              <p class="text-white font-semibold text-sm">
-                {{ currentStory?.author?.username || 'MeteorDub' }}
+              <p class="text-white font-semibold text-sm flex items-center gap-2">
+                MeteorDub Official
+                <span class="px-2 py-0.5 rounded-full bg-blue-500 text-white text-xs">✓</span>
               </p>
               <p class="text-white/70 text-xs">
                 {{ getTimeAgo(currentStory?.created_at) }}
@@ -144,6 +173,7 @@
               playsinline
               @loadeddata="handleMediaLoad"
               @ended="nextStory"
+              @timeupdate="handleVideoProgress"
             ></video>
 
             <!-- Text Story -->
@@ -152,11 +182,16 @@
               class="w-full h-full flex items-center justify-center p-8"
               :style="{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }"
             >
-              <div class="text-center">
-                <h2 v-if="currentStory.title" class="text-3xl font-bold text-white mb-4">
+              <div class="text-center max-w-lg">
+                <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                </div>
+                <h2 v-if="currentStory.title" class="text-2xl sm:text-3xl font-bold text-white mb-4">
                   {{ currentStory.title }}
                 </h2>
-                <p class="text-xl text-white/90 leading-relaxed">
+                <p class="text-lg sm:text-xl text-white/90 leading-relaxed">
                   {{ currentStory.text }}
                 </p>
               </div>
@@ -178,8 +213,18 @@
           </div>
 
           <!-- Story Footer (if title exists) -->
-          <div v-if="currentStory?.title && currentStory?.media_type !== 'text'" class="absolute bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-black/80 to-transparent">
-            <h3 class="text-white font-semibold text-lg">{{ currentStory.title }}</h3>
+          <div v-if="currentStory?.title && currentStory?.media_type !== 'text'" class="absolute bottom-0 left-0 right-0 z-40 p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M11 5v11.17l-4.88-4.88c-.39-.39-1.03-.39-1.42 0-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0l6.59-6.59c.39-.39.39-1.02 0-1.41-.39-.39-1.02-.39-1.41 0L13 16.17V5c0-.55-.45-1-1-1s-1 .45-1 1z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-white font-bold text-lg mb-1">{{ currentStory.title }}</h3>
+                <p v-if="currentStory.text" class="text-white/80 text-sm line-clamp-2">{{ currentStory.text }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -223,7 +268,6 @@ const fetchStories = async () => {
   try {
     const response = await fetch(`${API_BASE}/stories/`);
     const data = await response.json();
-    // API returns 'results' not 'data'
     if (data.results && data.results.length > 0) {
       stories.value = data.results;
       console.log('✅ Stories loaded:', stories.value.length);
@@ -233,18 +277,6 @@ const fetchStories = async () => {
   } catch (error) {
     console.error('❌ Error fetching stories:', error);
   }
-};
-
-// Get story thumbnail
-const getStoryThumbnail = (story) => {
-  if (!story) return '';
-  if (story.media_type === 'image' && story.media) {
-    return story.media;
-  }
-  if (story.media_type === 'video' && story.media) {
-    return story.media;
-  }
-  return '';
 };
 
 // Get time ago
@@ -292,6 +324,13 @@ const closeStories = () => {
 // Start progress
 const startProgress = () => {
   stopProgress();
+  
+  // For videos, don't use timer - let video @ended event handle it
+  if (currentStory.value?.media_type === 'video') {
+    return;
+  }
+  
+  // For images and text, use 5 second timer
   progressInterval = setInterval(() => {
     if (!isPaused.value && !isLoadingMedia.value) {
       progress.value += (PROGRESS_UPDATE_INTERVAL / STORY_DURATION) * 100;
@@ -358,6 +397,18 @@ const toggleMute = () => {
 // Handle media load
 const handleMediaLoad = () => {
   isLoadingMedia.value = false;
+  // Restart progress for new story
+  if (currentStory.value?.media_type !== 'video') {
+    startProgress();
+  }
+};
+
+// Handle video progress for progress bar
+const handleVideoProgress = () => {
+  if (videoRef.value && currentStory.value?.media_type === 'video') {
+    const percent = (videoRef.value.currentTime / videoRef.value.duration) * 100;
+    progress.value = percent;
+  }
 };
 
 // Touch handlers for swipe
@@ -409,6 +460,10 @@ watch(currentStoryIndex, () => {
     videoRef.value.load();
     videoRef.value.play();
   }
+  // Restart progress for new story
+  progress.value = 0;
+  isLoadingMedia.value = true;
+  startProgress();
 });
 
 // Keyboard navigation
@@ -457,6 +512,21 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Line clamp */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Prevent text selection */
